@@ -6,7 +6,6 @@ var client = contentful.createClient({
 });
 
 export default function ProductPage(props) {
-  console.log(props)
   if (props.error) {
     return (
       <div>
@@ -52,12 +51,10 @@ export async function getStaticProps(context) {
       limit: 1,
       "fields.productId": context.params.slug,
     })
-  
-  console.log("products: ", product)
 
   return {
     props: {
-      error: !product.items.length 
+      error: !product.items.length
         && `No product with id: ${context.params.slug}`,
       ...product?.items?.[0]?.fields
     },
