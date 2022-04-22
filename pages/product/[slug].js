@@ -1,9 +1,5 @@
-import * as contentful from "contentful"
-
-var client = contentful.createClient({
-  space: process.env.CONTENTFUL_SPACE_ID,
-  accessToken: process.env.CONTENTFUL_ACCESS_TOKEN,
-});
+import PreviewBanner from "../../components/PreviewBanner"
+import * as contentful from "../../utils/contentful"
 
 export default function ProductPage(props) {
   if (props.error) {
@@ -17,6 +13,7 @@ export default function ProductPage(props) {
 
   return (
     <div>
+      {props.preview && <PreviewBanner />}
       <h1>{props.heading}</h1>
       <h2>{props.subheading}</h2>
     </div>
@@ -24,7 +21,7 @@ export default function ProductPage(props) {
 }
 
 export async function getStaticPaths() {
-  const products = await client
+  const products = await contentful.client
     .getEntries({
       content_type: 'productReview',
     })
@@ -44,7 +41,12 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps(context) {
+  console.log("context: ", context)
   // Get data from headless CMS
+  const client = context.preview
+    ? contentful.previewClient
+    : contentful.client
+
   const product = await client
     .getEntries({
       content_type: 'productReview',
@@ -54,6 +56,7 @@ export async function getStaticProps(context) {
 
   return {
     props: {
+      preview: context.preview || false,
       error: !product.items.length
         && `No product with id: ${context.params.slug}`,
       ...product?.items?.[0]?.fields
